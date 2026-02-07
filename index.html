@@ -1,0 +1,376 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spell Blaster: The Adaptive Word War</title>
+<link href="https://fonts.googleapis.com/css2?family=Jersey+15&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?t=1707400000">
+</head>
+<body>
+<div id="home">
+  <div class="home-wrap">
+    <div class="home-card home-header">
+      <h1>Vocab Exercise Archade</h1>
+      <p>Practice vocablary with a game you like!</p>
+    </div>
+    <div class="home-grid">
+      <button id="chooseShooting" class="home-card">Shooting Game</button>
+      <button id="chooseVegetable" class="home-card">Vegetable Cutting Race</button>
+      <button id="chooseCheese" class="home-card">Hungry Mouse</button>
+      <button id="chooseMinecart" class="home-card">Minecart</button>
+    </div>
+    <button id="flashBtn" class="home-card" style="margin-top: 12px;">Flashcards</button>
+  </div>
+</div>
+<div id="wordBookSelectWrap" style="position: fixed; top: 12px; right: 12px; z-index: 31; display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
+  <button id="openWordBookBtn" style="background: #1e293b; color: #e6edf3; border: 1px solid #334155; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">単語追加</button>
+  <div lang="ja" id="wordBookSelectDropdown" style="display: flex; flex-direction: column; gap: 4px; align-items: flex-end; position: relative;">
+    <button type="button" id="wordBookSelectToggle" style="min-width: 180px; font-size: 13px; color: #e6edf3; background: #1e293b; border: 1px solid #334155; border-radius: 6px; padding: 10px 12px; cursor: pointer; text-align: left; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
+      <span>単語帳セレクト</span>
+      <span id="wordBookSelectChevron" style="margin-left: 8px; transition: transform 0.2s;">▼</span>
+    </button>
+    <div id="wordBookSourceList" class="word-book-list-hidden" style="min-width: 180px; border: 1px solid #334155; border-radius: 6px; background: #1e293b; overflow: hidden; position: absolute; top: 100%; margin-top: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+      <div id="wordBookSourceRows"></div>
+      <button type="button" id="wordBookCreateNewBtn" lang="ja" style="width: 100%; padding: 8px 10px; border: none; border-top: 1px solid #334155; background: #0f172a; color: #94a3b8; font-size: 12px; cursor: pointer; text-align: center;">＋ 新しく単語帳を作成</button>
+    </div>
+  </div>
+</div>
+<div id="wordBookContentModal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 36; display: flex; align-items: center; justify-content: center;">
+  <div class="summary-card" style="max-width: 480px; max-height: 80vh; overflow: hidden; position: relative; display: flex; flex-direction: column;">
+    <button id="closeWordBookContentBtn" class="close-btn" style="position: absolute; top: 10px; right: 10px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; z-index: 1;">×</button>
+    <h2 id="wordBookContentTitle" lang="ja" style="margin: 0 0 12px 0; padding-right: 36px;">単語帳の内容</h2>
+    <div id="wordBookContentBody" style="display: flex; flex-direction: column; flex: 1; min-height: 0;">
+      <div id="wordBookContentRenameArea" lang="ja" style="margin-bottom: 12px; display: none; align-items: center; flex-wrap: wrap; gap: 8px;">
+        <button type="button" id="wordBookContentRenameBtn" style="background: #374151; color: #e6edf3; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">名前を変更</button>
+        <button type="button" id="wordBookContentAddWordBtn" style="background: #166534; color: #dcfce7; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">単語を追加</button>
+      </div>
+      <div id="wordBookContentRenameForm" lang="ja" class="hidden" style="margin-bottom: 12px; padding: 12px; background: #0b1225; border: 1px solid #1e293b; border-radius: 8px;">
+        <label style="display: block; margin-bottom: 8px; font-size: 13px;">名前</label>
+        <input id="wordBookContentRenameInput" type="text" autocomplete="off" style="width: 100%; box-sizing: border-box; padding: 8px 10px; border-radius: 6px; border: 1px solid #1e293b; background: #1e293b; color: #e6edf3; margin-bottom: 8px;" />
+        <div style="display: flex; gap: 8px;">
+          <button type="button" id="wordBookContentRenameCancel" style="background: #64748b; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">キャンセル</button>
+          <button type="button" id="wordBookContentRenameSave" style="background: #22c55e; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">保存</button>
+        </div>
+      </div>
+      <ul id="wordBookContentList" lang="ja" style="list-style: none; margin: 0; padding: 0; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 6px;"></ul>
+      <div id="wordBookContentDeleteArea" lang="ja" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #1e293b; display: none;">
+        <button type="button" id="wordBookContentDeleteBtn" style="background: #7f1d1d; color: #fecaca; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 13px;">単語帳を削除</button>
+      </div>
+    </div>
+    <div id="wordBookContentConfirm" lang="ja" class="hidden" style="position: absolute; inset: 0; background: #0f172a; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 24px;">
+      <p style="margin: 0; font-size: 16px;">本当に削除しますか？</p>
+      <div style="display: flex; gap: 12px;">
+        <button type="button" id="wordBookContentConfirmCancel" style="background: #64748b; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">キャンセル</button>
+        <button type="button" id="wordBookContentConfirmDelete" style="background: #dc2626; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">削除する</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="wordBookCreateModal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 36; display: flex; align-items: center; justify-content: center;">
+  <div class="summary-card" style="max-width: 360px; position: relative;">
+    <button id="closeWordBookCreateBtn" class="close-btn" style="position: absolute; top: 10px; right: 10px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1;">×</button>
+    <h2 lang="ja" style="margin: 0 0 16px 0; padding-right: 36px;">新しい単語帳</h2>
+    <p lang="ja" style="color: #94a3b8; font-size: 0.9em; margin-bottom: 12px;">単語帳の名前を決めてください。</p>
+    <label lang="ja" style="display: block; margin-bottom: 16px;">
+      <span style="display: block; margin-bottom: 4px; font-size: 13px;">名前</span>
+      <input id="wordBookCreateNameInput" type="text" placeholder="例: 英単語テスト用" autocomplete="off" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 8px; border: 1px solid #1e293b; background: #0b1225; color: #e6edf3;" />
+    </label>
+    <div style="display: flex; gap: 12px; justify-content: flex-end;">
+      <button type="button" id="wordBookCreateCancelBtn" lang="ja" style="background: #64748b; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">キャンセル</button>
+      <button type="button" id="wordBookCreateConfirmBtn" lang="ja" style="background: #22c55e; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">作成</button>
+    </div>
+  </div>
+</div>
+<div id="wordBookModal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 35; display: flex; align-items: center; justify-content: center;">
+  <div class="summary-card" style="max-width: 520px; max-height: 85vh; overflow-y: auto; position: relative;">
+    <button id="closeWordBookBtn" class="close-btn" style="position: absolute; top: 10px; right: 10px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1;">×</button>
+    <h2 lang="ja" style="margin-top: 0;">マイ単語帳</h2>
+    <p lang="ja" style="color: #94a3b8; font-size: 0.9em; margin-bottom: 12px;">好きな単語を追加できます。日本語と英語のペアで登録してください。</p>
+    <div lang="ja" style="margin-bottom: 16px;">
+      <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+        <span style="min-width: 100px; font-size: 13px;">追加先の単語帳</span>
+        <select id="wordBookModalTargetSelect" style="flex: 1; padding: 8px 12px; border-radius: 8px; border: 1px solid #1e293b; background: #0b1225; color: #e6edf3; font-size: 13px;"></select>
+      </label>
+    </div>
+    <div lang="ja" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+      <label style="display: flex; align-items: center; gap: 8px;">
+        <span style="min-width: 60px;">日本語</span>
+        <input id="wordBookNativeInput" type="text" placeholder="例: りんご" autocomplete="off" style="flex: 1; padding: 8px 12px; border-radius: 8px; border: 1px solid #1e293b; background: #0b1225; color: #e6edf3;" />
+      </label>
+      <label style="display: flex; align-items: center; gap: 8px;">
+        <span style="min-width: 60px;">英語</span>
+        <input id="wordBookTargetInput" type="text" placeholder="例: apple" autocomplete="off" style="flex: 1; padding: 8px 12px; border-radius: 8px; border: 1px solid #1e293b; background: #0b1225; color: #e6edf3;" />
+      </label>
+      <button id="wordBookAddBtn" style="background: #22c55e; color: white; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; align-self: flex-start;">追加</button>
+    </div>
+    <div lang="ja" style="border-top: 1px solid #1e293b; padding-top: 12px;">
+      <h3 style="margin: 0 0 8px 0; font-size: 1rem;">登録した単語</h3>
+      <ul id="wordBookList" style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; max-height: 240px; overflow-y: auto;"></ul>
+      <p id="wordBookEmpty" style="margin: 0; color: #64748b; font-size: 0.9em;">まだ単語がありません。上のフォームから追加してください。</p>
+    </div>
+  </div>
+</div>
+<div id="ui">
+  <div class="hud">
+    <div class="hud-shoot-stats hidden" id="hudShootStats" lang="ja">出題 <span id="questionsShown">0</span> 問中 正解 <span id="correctCount">0</span> 問 不正解 <span id="wrongCount">0</span> 問</div>
+    <div class="hud-health" lang="ja">
+      <span class="hud-health-label">体力</span>
+      <div class="hud-health-bar"><div id="healthGaugeFill" class="hud-health-fill" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div></div>
+    </div>
+    <div class="hud-score">Score: <span id="score">0</span></div>
+    <div class="hud-wordbook" lang="ja">単語帳: <span id="wordBookName">—</span></div>
+    <div class="hud-cheese-stats hidden" id="hudCheeseStats" lang="ja">出題 <span id="cheeseQuestionsShown">0</span> 問 正答 <span id="cheeseCorrectCount">0</span> 問 誤答 <span id="cheeseWrongCount">0</span> 問</div>
+  </div>
+  <div class="controls">
+    <button id="startBtn">Start</button>
+    <button id="pauseBtn">Pause</button>
+    <button id="voiceBtn">Voice: Off</button>
+    <button id="summaryToggleBtn">Summary</button>
+    <button id="homeBtn">Home</button>
+    <button id="debugKillEnemyBtn" style="background: #ef4444; color: white; font-weight: bold;">[DEBUG] Kill Enemy</button>
+    <button id="debugSpawnEnemyBtn" style="background: #f59e0b; color: white; font-weight: bold;">[DEBUG] Spawn Enemy</button>
+    <button id="debugSpawnBossBtn" style="background: #8b5cf6; color: white; font-weight: bold;">[DEBUG] Spawn Boss</button>
+  </div>
+  <input id="answerInput" type="text" placeholder="Type English translation here" autocomplete="off" />
+</div>
+<canvas id="game" width="960" height="600"></canvas>
+<div id="pauseMenu" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 20; display: flex; align-items: center; justify-content: center;">
+  <div style="background: #1e293b; padding: 40px; border-radius: 16px; text-align: center; min-width: 300px;">
+    <h2 style="color: #e6edf3; margin-bottom: 30px; font-size: 32px;">PAUSED</h2>
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <button id="toggleInputModeBtn" style="background: #3b82f6; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px;">入力式に切り替え</button>
+      <button id="resumeBtn" style="background: #22c55e; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px;">再開</button>
+    </div>
+  </div>
+</div>
+<div id="summary" class="hidden">
+  <div class="summary-card">
+    <h2>Level Summary</h2>
+    <div id="summaryBody"></div>
+    <div class="summary-actions">
+      <button id="restartBtn">Restart</button>
+      <button id="summaryBackToTitleBtn" lang="ja">タイトルに戻る</button>
+    </div>
+  </div>
+  </div>
+<div id="flashcards" class="hidden">
+  <div class="summary-card">
+    <button id="closeFlashcardsBtn" class="close-btn" style="position: absolute; top: 10px; right: 10px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1;">×</button>
+    <h2>Flashcards</h2>
+    <div id="flashBody"></div>
+  </div>
+  </div>
+<button id="helpBtn" style="position: fixed; top: 56px; right: 12px; z-index: 21; background: #3b82f6; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">?</button>
+<div id="help" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 24; display: flex; align-items: center; justify-content: center;">
+  <div class="summary-card" style="max-width: 600px; max-height: 80vh; overflow-y: auto; position: relative;">
+    <button id="closeHelpBtn" class="close-btn" style="position: absolute; top: 10px; right: 10px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1;">×</button>
+    <h2 lang="ja">遊び方</h2>
+    <div id="helpShoot" class="help-game" lang="ja" style="line-height: 1.8;">
+      <h3>Shooting Game</h3>
+      <p>画面上部から敵が降りてきます。日本語の単語が表示されるので、対応する英語を入力してください。正解すると敵を倒せます。</p>
+      <p style="margin-top: 1.2em; color: #94a3b8; font-size: 0.95em;">このガイドはゲーム内の?（Guide）ボタンからいつでも表示できます。</p>
+    </div>
+    <div id="helpVeg" class="help-game" lang="ja" style="line-height: 1.8; display: none;">
+      <h3>Vegetable Cutting Race</h3>
+      <p>制限時間内に日本語の単語に対応する英語を入力して野菜を切ります。全て正解すると次のセットに進めます。</p>
+      <p style="margin-top: 1.2em; color: #94a3b8; font-size: 0.95em;">このガイドはゲーム内の?（Guide）ボタンからいつでも表示できます。</p>
+    </div>
+    <div id="helpCheese" class="help-game" lang="ja" style="line-height: 1.8; display: none;">
+      <h3>Hungry Mouse</h3>
+      <p>画面上部からチーズ🧀と毒が落ちてきます。左右に表示されている日本語の英訳を入力すると、プレイヤーが1マスずつ左右に移動します。</p>
+      <ul>
+        <li>左の単語を入力 → 1マス左に移動</li>
+        <li>右の単語を入力 → 1マス右に移動</li>
+        <li>端にいる時にそちら側の単語を入力しても動きません</li>
+        <li>チーズを拾うと+100ポイント</li>
+        <li>毒を拾うと-50ポイント（答えが表示され、スペースキーで再開）</li>
+        <li>チーズを落とすと-50ポイント（答えが表示され、スペースキーで再開）</li>
+        <li>スペースキーでオブジェクトを即座に落とせます</li>
+      </ul>
+      <p style="margin-top: 1.2em; color: #94a3b8; font-size: 0.95em;">このガイドはゲーム内の?（Guide）ボタンからいつでも表示できます。</p>
+    </div>
+  </div>
+</div>
+<div id="shootHowToPlay" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 35; display: flex; align-items: center; justify-content: center;">
+  <div class="summary-card" style="max-width: 560px; max-height: 85vh; overflow-y: auto; position: relative;">
+    <h2 lang="ja" style="margin-top: 0;">Shooting Game の遊び方</h2>
+    <div lang="ja" style="line-height: 1.8;">
+      <p>画面上部から敵が降りてきます。日本語の単語が表示されるので、対応する英語を入力してください。正解すると敵を倒せます。</p>
+      <p style="margin-top: 1.2em; color: #94a3b8; font-size: 0.95em;">このガイドはゲーム内の?（Guide）ボタンからいつでも表示できます。</p>
+    </div>
+    <div style="display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap;">
+      <button id="shootHowToPlayStartBtn" style="background: #22c55e; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px;">ゲームを始める</button>
+      <button id="shootHowToPlayBackBtn" style="background: #64748b; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px;">戻る</button>
+    </div>
+  </div>
+</div>
+<div id="vegHowToPlay" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 35; display: flex; align-items: center; justify-content: center;">
+  <div class="summary-card" style="max-width: 560px; max-height: 85vh; overflow-y: auto; position: relative;">
+    <h2 lang="ja" style="margin-top: 0;">Vegetable Cutting Race の遊び方</h2>
+    <div lang="ja" style="line-height: 1.8;">
+      <p>制限時間内に日本語の単語に対応する英語を入力して野菜を切ります。全て正解すると次のセットに進めます。</p>
+      <p style="margin-top: 1.2em; color: #94a3b8; font-size: 0.95em;">このガイドはゲーム内の?（Guide）ボタンからいつでも表示できます。</p>
+    </div>
+    <div style="display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap;">
+      <button id="vegHowToPlayStartBtn" style="background: #22c55e; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px;">ゲームを始める</button>
+      <button id="vegHowToPlayBackBtn" style="background: #64748b; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px;">戻る</button>
+    </div>
+  </div>
+</div>
+<div id="cheeseHowToPlay" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 35; display: flex; align-items: center; justify-content: center;">
+  <div class="summary-card" style="max-width: 560px; max-height: 85vh; overflow-y: auto; position: relative;">
+    <h2 lang="ja" style="margin-top: 0;">Hungry Mouse の遊び方</h2>
+    <div lang="ja" style="line-height: 1.8;">
+      <p>画面上部からチーズ🧀と毒が落ちてきます。左右に表示されている日本語の英訳を入力すると、プレイヤーが1マスずつ左右に移動します。</p>
+      <ul>
+        <li>左の単語を入力 → 1マス左に移動</li>
+        <li>右の単語を入力 → 1マス右に移動</li>
+        <li>端にいる時にそちら側の単語を入力しても動きません</li>
+        <li>チーズを拾うと+100ポイント</li>
+        <li>毒を拾うと-50ポイント（答えが表示され、スペースキーで再開）</li>
+        <li>チーズを落とすと-50ポイント（答えが表示され、スペースキーで再開）</li>
+        <li>スペースキーでオブジェクトを即座に落とせます</li>
+      </ul>
+      <p style="margin-top: 1.2em; color: #94a3b8; font-size: 0.95em;">このガイドはゲーム内の?（Guide）ボタンからいつでも表示できます。</p>
+    </div>
+    <div style="display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap;">
+      <button id="cheeseHowToPlayStartBtn" style="background: #22c55e; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px;">ゲームを始める</button>
+      <button id="cheeseHowToPlayBackBtn" style="background: #64748b; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px;">戻る</button>
+    </div>
+  </div>
+</div>
+<!-- 学習モード選択モーダル -->
+<div id="wordSetSelectionModal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 37; display: flex; align-items: center; justify-content: center;">
+  <div class="summary-card" style="max-width: 560px; position: relative;">
+    <button id="closeWordSetSelectionBtn" class="close-btn" style="position: absolute; top: 10px; right: 10px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1;">×</button>
+    <h2 lang="ja" style="margin-top: 0;">学習モードを選択</h2>
+    <p lang="ja" style="color: #94a3b8; font-size: 0.9em; margin-bottom: 20px;">プレイで出題する単語の選び方を選んでください（最大20語）</p>
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <button class="word-set-mode-btn" data-mode="random-all" style="background: #3b82f6; color: white; border: none; padding: 16px 20px; border-radius: 8px; cursor: pointer; font-size: 15px; text-align: left;">
+        <div style="font-weight: bold; margin-bottom: 4px;">完全ランダム</div>
+        <div style="font-size: 13px; opacity: 0.9;">単語帳全体からランダムに20語</div>
+      </button>
+      <button class="word-set-mode-btn" data-mode="random-review" style="background: #8b5cf6; color: white; border: none; padding: 16px 20px; border-radius: 8px; cursor: pointer; font-size: 15px; text-align: left;">
+        <div style="font-weight: bold; margin-bottom: 4px;">復習ランダム</div>
+        <div style="font-size: 13px; opacity: 0.9;">習得済み以外からランダムに20語</div>
+      </button>
+      <button class="word-set-mode-btn" data-mode="random-weak" style="background: #ef4444; color: white; border: none; padding: 16px 20px; border-radius: 8px; cursor: pointer; font-size: 15px; text-align: left;">
+        <div style="font-weight: bold; margin-bottom: 4px;">弱点集中ランダム</div>
+        <div style="font-size: 13px; opacity: 0.9;">要予習の単語のみ（20語以下の場合あり）</div>
+      </button>
+      <button class="word-set-mode-btn" data-mode="manual" style="background: #10b981; color: white; border: none; padding: 16px 20px; border-radius: 8px; cursor: pointer; font-size: 15px; text-align: left;">
+        <div style="font-weight: bold; margin-bottom: 4px;">手動選択</div>
+        <div style="font-size: 13px; opacity: 0.9;">自分で単語を選ぶ（最大20語）</div>
+      </button>
+    </div>
+  </div>
+</div>
+<!-- 手動選択モーダル -->
+<div id="manualWordSelectionModal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 38; display: flex; align-items: center; justify-content: center;">
+  <div class="summary-card" style="max-width: 640px; max-height: 85vh; overflow: hidden; display: flex; flex-direction: column; position: relative;">
+    <button id="closeManualWordSelectionBtn" class="close-btn" style="position: absolute; top: 10px; right: 10px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; z-index: 1;">×</button>
+    <h2 lang="ja" style="margin-top: 0;">単語を選択（最大20語）</h2>
+    <p lang="ja" style="color: #94a3b8; font-size: 0.9em; margin-bottom: 12px;">選択数: <span id="manualSelectionCount">0</span> / 20</p>
+    <div style="flex: 1; overflow-y: auto; margin-bottom: 16px;">
+      <div id="manualWordList" style="display: flex; flex-direction: column; gap: 6px;"></div>
+    </div>
+    <button id="startWithManualSelection" lang="ja" style="background: #22c55e; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px; width: 100%;">選択した単語で開始</button>
+  </div>
+</div>
+<div id="veg" class="hidden">
+  <div class="veg-hud">
+    <div class="veg-hide">Vegetable: <span id="vegName">—</span></div>
+    <div>Round: <span id="vegRound">1</span></div>
+    <div class="veg-hide">Difficulty: <span id="vegDiff">Easy</span></div>
+    <div style="display:none">Timer: <span id="vegTimer">30.0</span>s</div>
+  </div>
+  <div class="danger-gauge-container" id="dangerGaugeContainer">
+    <span class="danger-gauge-label">DANGER</span>
+    <div class="danger-gauge-bar" id="dangerGaugeBar">
+      <div class="danger-gauge-fill" id="dangerGaugeFill"></div>
+    </div>
+    <span class="danger-gauge-pct" id="dangerGaugePct">0%</span>
+  </div>
+  <div class="veg-board" id="vegBoard"></div>
+  <div id="vegOverlay" class="veg-overlay hidden">
+    <div class="veg-overlay-content">
+      <div id="vegOverlayTitle">Missed</div>
+      <div id="vegOverlayPenalty">-50</div>
+    </div>
+  </div>
+  <div id="vegCountdown" class="veg-overlay hidden">
+    <div class="veg-overlay-content">
+      <div id="vegCountdownNumber" style="font-size: 120px; color: #e6edf3; font-weight: bold;">3</div>
+    </div>
+  </div>
+  <div id="vegPause" class="veg-overlay hidden">
+    <div class="veg-overlay-content">
+      <div style="font-size: 96px; color: #e6edf3; font-weight: bold;">PAUSED</div>
+    </div>
+  </div>
+  <div id="vegPassOverlay" class="veg-overlay hidden">
+    <div class="veg-overlay-content">
+      <div id="vegPassAnswer" style="font-size: 72px; color: #e6edf3; font-weight: bold;"></div>
+    </div>
+  </div>
+  <img id="vegCarrot" class="veg-carrot hidden" alt="carrot" src="public/carrotnoword.PNG" />
+  <div class="veg-controls">
+    <button id="vegPass">Pass</button>
+  </div>
+  <div id="vegResult" class="hidden">
+    <div class="summary-card">
+      <button id="closeVegResultBtn" class="close-btn" style="position: absolute; top: 10px; right: 10px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1;">×</button>
+      <h2>Round Result</h2>
+      <div id="vegResultBody"></div>
+      <button id="vegNextSetBtn">Next Set</button>
+      <button id="vegRetryBtn">Retry</button>
+    </div>
+  </div>
+</div>
+<div id="minecart" class="hidden">
+  <div class="minecart-question-top">
+    <p class="minecart-question-text" id="minecartQuestionText">テスト問題</p>
+  </div>
+  <div class="minecart-scene">
+    <div class="minecart-rails"></div>
+    <div class="minecart-cart">
+      <img class="minecart-img" src="public/torokko.png" alt="" />
+      <div class="minecart-body minecart-fallback"></div>
+      <div class="minecart-wheels minecart-fallback"></div>
+    </div>
+  </div>
+  <div class="minecart-quiz">
+    <p class="minecart-question-num" id="minecartQuestionNum" lang="ja">第 1 問</p>
+    <div class="minecart-choices" id="minecartChoices">
+      <button type="button" class="minecart-choice" data-choice="A">A</button>
+      <button type="button" class="minecart-choice" data-choice="B">B</button>
+      <button type="button" class="minecart-choice" data-choice="C">C</button>
+      <button type="button" class="minecart-choice" data-choice="D">D</button>
+    </div>
+  </div>
+  <div id="minecartPause" class="minecart-pause hidden">
+    <div class="minecart-pause-content">
+      <h2>PAUSED</h2>
+      <p lang="ja">Esc キーで再開</p>
+    </div>
+  </div>
+  <div id="minecartResult" class="minecart-result hidden">
+    <div class="minecart-result-content">
+      <h2 lang="ja">正誤判定ページ</h2>
+      <p id="minecartResultMessage" class="minecart-result-message" lang="ja">正解か不正解かを表示</p>
+      <button type="button" id="minecartResultNextBtn" lang="ja">次へ</button>
+    </div>
+  </div>
+  <div id="minecartGameOver" class="minecart-gameover hidden">
+    <div class="minecart-gameover-content">
+      <h2 lang="ja">ゲームオーバー</h2>
+      <p class="minecart-gameover-score" id="minecartGameOverScore" lang="ja">正解数: 0 問</p>
+      <button type="button" id="minecartGameOverBackBtn" lang="ja">タイトルに戻る</button>
+    </div>
+  </div>
+</div>
+<script src="game.js?t=1707400000"></script>
+</body>
+</html>
